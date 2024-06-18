@@ -2,10 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <h1>Lobby</h1>
+    <title>Lobby</title>
+    <center><h1 class="title">Lobby</h1></center>
 </head>
 <body>
     {% csrf_token %}
+    <center>
+        <div class="container">
+            <form action="" method="POST">
+                <label class="lbl" for="">Username</label><br>
+                <input type="text" placeholder="Username" name="username" required><br>
+                <label class="lbl" for="">Room</label><br>
+                <input type="text" placeholder="Room" name="room" required><br>
+                <center><button class="button" type="submit">Submit</button></center>
+            </form>
+        </div>
+    </center>
 </body>
+<style>
+    * form {
+        width: 80%;
+    }
+
+    .container {
+        background-color: #891D29;
+        height:14vh;
+        width:14%;
+        border-radius: 10px;
+        label-color: #ffffff;
+
+    }
+
+    body {
+        background-color: #441530;
+    }
+
+    .lbl{
+        color: white;
+        font-size: 20px;
+    }
+
+    .title{
+        color: white
+    }
+
+    input {
+        padding: 5px;
+        border: 1px;
+        width: 100%;
+        margin: 5px;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 5px;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        width: 30%;
+    }
+</style>
 </html>
