@@ -6,14 +6,14 @@
     <center><h1 class="title">Lobby</h1></center>
 </head>
 <body>
-    {% csrf_token %}
     <center>
         <div class="container">
             <form action="" method="POST">
+                {% csrf_token %}
                 <label class="lbl" for="">Username</label><br>
                 <input type="text" placeholder="Username" name="username" required><br>
                 <label class="lbl" for="">Room</label><br>
-                <input type="text" placeholder="Room" name="room" required><br>
+                <input type="text" placeholder="Room" name="chat_name" required><br>
                 <center><button class="button" type="submit">Submit</button></center>
             </form>
         </div>

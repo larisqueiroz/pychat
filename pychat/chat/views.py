@@ -7,13 +7,11 @@ from .models import *
 
 def EnterChat(request):
     if request.method == 'POST':
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
-        
-        username = body['username']
-        chat_name = body['chat_name']
+        username = request.POST['username']
+        chat_name = request.POST['chat_name']
+        print(username, chat_name)
 
-        saved_user = User.objects.filter(username=username) # TODO deixar o username unico
+        saved_user = User.objects.filter(username=username)
         saved = list(saved_user)
         if saved == []:
             new_user = User(username=username)
@@ -25,7 +23,8 @@ def EnterChat(request):
         except:
             new_chat = Chat(name=chat_name)
             new_chat.save()
+            return redirect('chat', chat_name=chat_name, username=username)
     return render(request, 'lobby.html')
 
-def SendMessage(request):
+def SendMessage(request, chat_name, username):
     return render(request, 'chat.html')
