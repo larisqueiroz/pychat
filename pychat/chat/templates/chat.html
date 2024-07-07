@@ -15,18 +15,19 @@
             <div class="chat-body-parent">
                 <div class="chat-body" id="tasks">
                     <div class="message" id="chatContainer">
-                      <!-- received messages and displayed here -->
-
-
+                       <!-- Received messages are displayed here -->
+                        {% for i in messages %}
+                            {% if i.sender != user %}
                                 <div class="receive">
                                     <p style="color: #000;"> {{i.message}}<strong>-{{i.sender}}</strong></p>
                                 </div>
-
+                            {% else %}
                                 <div class="send">
                                     <p style="color: #000;">{{i.message}}</p>
                                 </div>
-
-                    <!-- end receive messages -->
+                            {% endif %}
+                        {% endfor %}
+                        <!-- End of received messages -->
                     </div>
 
                     <div class="form">
@@ -47,6 +48,17 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
+    const websocket = window.location.protocol === "https:" ? "wss" : "ws";
+    const websocketEndpoint = `${websocket}://${window.location.host}/ws/notification/{{chat_name}}/`;
+    const socket = new WebSocket(websocketEndpoint);
+
+    socket.onopen = (event) => {
+        console.log("Websocket oppened connection");
+    }
+
+    socket.onclose = (event) => {
+        console.log("Websocket closed connection");
+    }
 
 </script>
 <style>

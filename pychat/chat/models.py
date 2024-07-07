@@ -12,6 +12,9 @@ class Chat(Base):
     final_datetime = models.DateTimeField(null=True, blank=True)
     initial_datetime = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 class User(Base):
     username = models.CharField(max_length=15, null=False, blank=False, unique=True)
     """password = models.CharField(max_length=12, null=False, blank=False)
@@ -22,3 +25,6 @@ class Message(Base):
     content = models.CharField(null=False, max_length=1000, blank=False)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime_sent = models.DateTimeField(null=True, blank=True, default=None)
+
+    def __str__(self):
+        return self.chat_id

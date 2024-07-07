@@ -26,5 +26,14 @@ def EnterChat(request):
             return redirect('chat', chat_name=chat_name, username=username)
     return render(request, 'lobby.html')
 
-def SendMessage(request, chat_name, username):
-    return render(request, 'chat.html')
+def ReadAndSendMessage(request, chat_name, username):
+    chat = Chat.objects.filter(active=True).get(name=chat_name)
+    messages = Message.objects.filter(active=True).filter(chat_id=chat.id)
+
+    context = {
+        "messages": messages,
+        "user": username,
+        "chat_name": chat_name
+    }
+
+    return render(request, 'chat.html', context)
