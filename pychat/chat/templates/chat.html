@@ -52,6 +52,32 @@
     const websocketEndpoint = `${websocket}://${window.location.host}/ws/notification/{{chat_name}}/`;
     const socket = new WebSocket(websocketEndpoint);
 
+    document.getElementById('message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = document.getElementById('msg').value;
+        console.log(JSON.stringify({
+                'message': message,
+                'chat': '{{chat_name}}',
+                'sender': '{{user}}',
+            }));
+        socket.send(
+            JSON.stringify({
+                'message': message,
+                'chat': '{{chat_name}}',
+                'sender': '{{user}}',
+            })
+        );
+        console.log("WebSocket message sent");
+    });
+
+    socket.onsend = (event) => {
+        console.log("Websocket sent");
+    }
+
+    socket.onmessage = (event) => {
+        console.log("Websocket received", event.data);
+    }
+
     socket.onopen = (event) => {
         console.log("Websocket oppened connection");
     }

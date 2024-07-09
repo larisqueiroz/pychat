@@ -15,6 +15,8 @@ from django.core.asgi import get_asgi_application
 
 from .routing import websockets_urlpatterns
 
+#from .routing import websockets_urlpatterns
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pychat.settings')
 
 django_asgi_app = get_asgi_application()
