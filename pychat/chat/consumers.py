@@ -32,7 +32,8 @@ class Consumer(AsyncWebsocketConsumer):
         await self.create(data=data)
         response = {
             'sender': data['sender'],
-            'message': data['message']
+            'message': data['message'],
+            'datetime_sent': str(datetime.datetime.now())
         }
         await self.send(text_data=json.dumps({'message': response}))
 

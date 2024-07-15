@@ -35,5 +35,5 @@ def ReadAndSendMessage(request, chat_name, username):
         "user": username,
         "chat_name": chat_name
     }
-
+    print(context)
     return render(request, 'chat.html', context)

@@ -17,13 +17,13 @@
                     <div class="message" id="chatContainer">
                        <!-- Received messages are displayed here -->
                         {% for i in messages %}
-                            {% if i.sender != user %}
+                            {% if i.sender.username != user %}
                                 <div class="receive">
-                                    <p style="color: #000;"> {{i.message}}<strong>-{{i.sender}}</strong></p>
+                                    <p style="color: #000;"> {{i.content}}<strong>-{{i.sender.username}}-{{i.datetime_sent}}</strong></p>
                                 </div>
                             {% else %}
                                 <div class="send">
-                                    <p style="color: #000;">{{i.message}}</p>
+                                    <p style="color: #000;">{{i.content}}--{{i.datetime_sent}}</p>
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -52,28 +52,6 @@
     const websocketEndpoint = `${websocket}://${window.location.host}/ws/notification/{{chat_name}}/`;
     const socket = new WebSocket(websocketEndpoint);
 
-    document.getElementById('message-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const message = document.getElementById('msg').value;
-        console.log(JSON.stringify({
-                'message': message,
-                'chat': '{{chat_name}}',
-                'sender': '{{user}}',
-            }));
-        socket.send(
-            JSON.stringify({
-                'message': message,
-                'chat': '{{chat_name}}',
-                'sender': '{{user}}',
-            })
-        );
-        console.log("WebSocket message sent");
-    });
-
-    socket.onsend = (event) => {
-        console.log("Websocket sent");
-    }
-
     socket.onmessage = (event) => {
         console.log("Websocket received", event.data);
     }
@@ -85,6 +63,41 @@
     socket.onclose = (event) => {
         console.log("Websocket closed connection");
     }
+
+    document.getElementById('message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = document.getElementById('msg').value;
+        socket.send(
+            JSON.stringify({
+                'message': message,
+                'chat': '{{chat_name}}',
+                'sender': '{{user}}'
+            })
+        );
+        console.log("WebSocket message sent");
+    });
+
+    socket.addEventListener("message", (event) => {
+        const messageData = JSON.parse(event.data).message;
+
+        var sender = messageData.sender;
+        var message = messageData.message;
+        var datetime_sent = messageData.datetime_sent;
+
+        if (sender == '{{user}}'){
+            document.getElementById('msg').value = '';
+        }
+
+        var messageDiv = document.getElementById('chatContainer');
+
+        if (sender != '{{user}}') {
+            messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '<strong>-' + datetime_sent + '</strong></p></div>';
+        } else {
+            messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '<strong>-' + datetime_sent + '</strong></p></div>';
+        }
+        scrollToBottom();
+
+    });
 
 </script>
 <style>

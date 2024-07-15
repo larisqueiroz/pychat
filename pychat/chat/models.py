@@ -27,4 +27,4 @@ class Message(Base):
     datetime_sent = models.DateTimeField(null=True, blank=True, default=None)
 
     def __str__(self):
-        return self.chat_id
+        return self.content
