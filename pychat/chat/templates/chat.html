@@ -17,13 +17,13 @@
                     <div class="message" id="chatContainer">
                        <!-- Received messages are displayed here -->
                         {% for i in messages %}
-                            {% if i.sender.username != user %}
+                            {% if i.user_id.username != user %}
                                 <div class="receive">
-                                    <p style="color: #000;"> {{i.content}}<strong>-{{i.sender.username}}-{{i.datetime_sent}}</strong></p>
+                                    <p style="color: #000;"> {{i.content}}<strong>-{{i.user_id.username}}</strong></p>
                                 </div>
                             {% else %}
                                 <div class="send">
-                                    <p style="color: #000;">{{i.content}}--{{i.datetime_sent}}</p>
+                                    <p style="color: #000;">{{i.content}}</p>
                                 </div>
                             {% endif %}
                         {% endfor %}
