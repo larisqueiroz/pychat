@@ -32,15 +32,14 @@ class Consumer(AsyncWebsocketConsumer):
         await self.create(data=data)
         response = {
             'sender': data['sender'],
-            'message': data['message'],
-            'datetime_sent': str(datetime.datetime.now())
+            'message': data['message']
         }
         await self.send(text_data=json.dumps({'message': response}))
 
     @database_sync_to_async
     def create(self, data):
         print(data)
-        chat_by_name = Chat.objects.get(name=data['chat'])
+        chat_by_name = Chat.objects.get(name=data['chat_name'])
         sender = User.objects.get(username=data['sender'])
         if not Message.objects.filter(user_id=sender.id).filter(chat_id=chat_by_name.id)\
                 .filter(content=data['message']).exists():

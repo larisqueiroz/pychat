@@ -19,11 +19,13 @@
                         {% for i in messages %}
                             {% if i.user_id.username != user %}
                                 <div class="receive">
-                                    <p style="color: #000;"> {{i.content}}<strong>-{{i.user_id.username}}</strong></p>
+                                    <p style="color: #000;"> <strong>{{i.user_id.username}}</strong>: {{i.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, h:m"}}</p>
                                 </div>
                             {% else %}
                                 <div class="send">
-                                    <p style="color: #000;">{{i.content}}</p>
+                                    <p style="color: #000;">{{i.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, h:m"}}</p>
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -70,7 +72,7 @@
         socket.send(
             JSON.stringify({
                 'message': message,
-                'chat': '{{chat_name}}',
+                'chat_name': '{{chat_name}}',
                 'sender': '{{user}}'
             })
         );
@@ -78,25 +80,23 @@
     });
 
     socket.addEventListener("message", (event) => {
-        const messageData = JSON.parse(event.data).message;
+        const messageData = JSON.parse(event.data)['message'];
 
-        var sender = messageData.sender;
-        var message = messageData.message;
-        var datetime_sent = messageData.datetime_sent;
+    var sender = messageData['sender'];
+    var message = messageData['message'];
 
-        if (sender == '{{user}}'){
-            document.getElementById('msg').value = '';
-        }
+    if (sender == '{{user}}'){
+        document.getElementById('msg').value = '';
+    }
 
-        var messageDiv = document.getElementById('chatContainer');
+    var messageDiv = document.getElementById('chatContainer');
 
-        if (sender != '{{user}}') {
-            messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '<strong>-' + datetime_sent + '</strong></p></div>';
-        } else {
-            messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '<strong>-' + datetime_sent + '</strong></p></div>';
-        }
-        scrollToBottom();
-
+    if (sender != '{{user}}') {
+        messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
+    } else {
+        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p></div>';
+    }
+    scrollToBottom();
     });
 
 </script>
