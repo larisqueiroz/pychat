@@ -20,7 +20,7 @@
                             {% if x.user_id.username != user %}
                                 <div class="receive">
                                     <p style="color: #000;"> <strong>{{x.user_id.username}}</strong>: {{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, H:i"}}</p>
+                                    <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
                                 </div>
                             {% else %}
                                 <div class="send">
