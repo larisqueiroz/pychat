@@ -16,16 +16,16 @@
                 <div class="chat-body" id="tasks">
                     <div class="message" id="chatContainer">
                        <!-- Received messages are displayed here -->
-                        {% for i in messages %}
-                            {% if i.user_id.username != user %}
+                        {% for x in messages %}
+                            {% if x.user_id.username != user %}
                                 <div class="receive">
-                                    <p style="color: #000;"> <strong>{{i.user_id.username}}</strong>: {{i.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, h:m"}}</p>
+                                    <p style="color: #000;"> <strong>{{x.user_id.username}}</strong>: {{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, H:i"}}</p>
                                 </div>
                             {% else %}
                                 <div class="send">
-                                    <p style="color: #000;">{{i.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-                                    <p style="font-size:0.8vw; color: #ffffff">{{i.datetime_sent|date:"d/m/Y, h:m"}}</p>
+                                    <p style="color: #000;">{{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -69,11 +69,14 @@
     document.getElementById('message-form').addEventListener('submit', function(event) {
         event.preventDefault();
         const message = document.getElementById('msg').value;
+        var currentDate = new Date();
+        currentDate.setHours(currentDate.getHours() - 3);
         socket.send(
             JSON.stringify({
                 'message': message,
                 'chat_name': '{{chat_name}}',
-                'sender': '{{user}}'
+                'sender': '{{user}}',
+                'datetime_sent': currentDate
             })
         );
         console.log("WebSocket message sent");
@@ -84,17 +87,30 @@
 
     var sender = messageData['sender'];
     var message = messageData['message'];
+    console.log(messageData);
 
     if (sender == '{{user}}'){
         document.getElementById('msg').value = '';
     }
+
+    var currentDate = new Date();
+
+    var day = String(currentDate.getDate()).padStart(2, '0');
+    var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Os meses começam do 0
+    var year = currentDate.getFullYear();
+
+    var hours = String(currentDate.getHours()).padStart(2, '0');
+    var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+
+    var formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
 
     var messageDiv = document.getElementById('chatContainer');
 
     if (sender != '{{user}}') {
         messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
     } else {
-        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p></div>';
+        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p><p style="font-size:0.8vw; color: #ffffff";>' + formattedDate + '</p></div>';
+
     }
     scrollToBottom();
     });
