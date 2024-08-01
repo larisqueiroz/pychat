@@ -11,7 +11,7 @@
 <body>
     <div class="parent">
         <div class="child-2">
-            <center><h2 class="lbl">Chats</h2></center><hr>
+            <center><h2 class="lbl">{{chat_name}}</h2></center><hr>
             <div class="chat-body-parent">
                 <div class="chat-body" id="tasks">
                     <div class="message" id="chatContainer">
@@ -85,36 +85,36 @@
     socket.addEventListener("message", (event) => {
         const messageData = JSON.parse(event.data)['message'];
 
-    var sender = messageData['sender'];
-    var message = messageData['message'];
-    console.log(messageData);
+        var sender = messageData['sender'];
+        var message = messageData['message'];
+        console.log(messageData);
 
-    if (sender == '{{user}}'){
-        document.getElementById('msg').value = '';
-    }
+        if (sender == '{{user}}'){
+            document.getElementById('msg').value = '';
+        }
 
-    var currentDate = new Date();
+        var currentDate = new Date();
 
-    var day = String(currentDate.getDate()).padStart(2, '0');
-    var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Os meses começam do 0
-    var year = currentDate.getFullYear();
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Os meses começam do 0
+        var year = currentDate.getFullYear();
 
-    var hours = String(currentDate.getHours()).padStart(2, '0');
-    var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+        var hours = String(currentDate.getHours()).padStart(2, '0');
+        var minutes = String(currentDate.getMinutes()).padStart(2, '0');
 
-    var formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
+        var formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
 
-    var messageDiv = document.getElementById('chatContainer');
+        var messageDiv = document.getElementById('chatContainer');
 
-    if (sender != '{{user}}') {
-        messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
-    } else {
-        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p><p style="font-size:0.8vw; color: #ffffff";>' + formattedDate + '</p></div>';
+        if (sender != '{{user}}') {
+            messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
+        } else {
+            messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p><p style="font-size:0.8vw; color: #ffffff";>' + formattedDate + '</p></div>';
 
-    }
-    scrollToBottom();
+        }
+        scrollToBottom();
     });
-
+    window.onload = scrollToBottom;
 </script>
 <style>
 
