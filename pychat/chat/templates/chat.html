@@ -36,9 +36,7 @@
                         <form action="" id="message-form" method="POST">
                             {% csrf_token %}
                             <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your message" required></textarea>
-                                <button class="add-image" id="add-image" type="button">
-                                    <img class= "buttonpng" src="https://www.svgrepo.com/show/2825/add-symbol.svg" alt="buttonpng" border="0" />
-                                </button>
+                            <input type="file" accept=".jpg, .jpeg, .png" id="image" name="image">
                             <button class="submit" type="submit">Send</button>
                         </form>
                     </div>
@@ -69,21 +67,35 @@
         console.log("Websocket closed connection");
     }
 
-    document.getElementById('add-image').addEventListener('click', async function(event){
+
+    document.getElementById('image').addEventListener('change', function(event) {
         event.preventDefault();
-        const pickerOpts = {
-          types: [
-            {
-              description: "Images",
-              accept: {
-                "image/*": [".png", ".gif", ".jpeg", ".jpg"],
-              },
-            },
-          ],
-          excludeAcceptAllOption: true,
-          multiple: false,
+        const input = event.target;
+        var base64;
+        var res;
+        var reader = new FileReader();
+        const file = input.files[0];
+        if (file) {
+            reader.onloadend = function () {
+            baseString = reader.result;
+            console.log(baseString);
+
+            var currentDate = new Date();
+            currentDate.setHours(currentDate.getHours() - 3);
+
+            socket.send(
+                JSON.stringify({
+                    'message': '',
+                    'chat_name': '{{chat_name}}',
+                    'sender': '{{user}}',
+                    'datetime_sent': currentDate,
+                    'image_base64': baseString
+                })
+            );
         };
-        var files = await window.showOpenFilePicker(pickerOpts);
+        res = reader.readAsDataURL(file);
+        }
+
     });
 
     document.getElementById('message-form').addEventListener('submit', function(event) {
@@ -116,7 +128,7 @@
         var currentDate = new Date();
 
         var day = String(currentDate.getDate()).padStart(2, '0');
-        var month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Os meses começam do 0
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
         var year = currentDate.getFullYear();
 
         var hours = String(currentDate.getHours()).padStart(2, '0');
@@ -126,9 +138,9 @@
 
         var messageDiv = document.getElementById('chatContainer');
 
-        if (sender != '{{user}}') {
+        if (sender != '{{user}}' && message != '') {
             messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
-        } else {
+        } if (sender == '{{user}}' && message != '') {
             messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p><p style="font-size:0.8vw; color: #ffffff";>' + formattedDate + '</p></div>';
 
         }

@@ -33,7 +33,8 @@ class Consumer(AsyncWebsocketConsumer):
         response = {
             'sender': data['sender'],
             'message': data['message'],
-            'datetime_sent': data['datetime_sent']
+            'datetime_sent': data['datetime_sent'],
+            'image_base64': data['image_base64']
         }
         await self.send(text_data=json.dumps({'message': response}))
 
@@ -45,5 +46,5 @@ class Consumer(AsyncWebsocketConsumer):
         if not Message.objects.filter(user_id=sender.id).filter(chat_id=chat_by_name.id)\
                 .filter(content=data['message']).exists():
             new_message = Message(chat_id=chat_by_name, datetime_sent= data['datetime_sent'],
-                                  user_id=sender, content=data['message'])
+                                  user_id=sender, content=data['message'], img_base64=data['image_base64'])
             new_message.save()
