@@ -23,7 +23,7 @@ class User(Base):
 class Message(Base):
     chat_id = models.ForeignKey(Chat, on_delete=models.CASCADE)
     content = models.CharField(null=True, max_length=1000, blank=True)
-    img_base64 = models.CharField(null=True, max_length=3000, blank=True)
+    img_base64 = models.ImageField(null=True, blank=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime_sent = models.DateTimeField(null=True, blank=True, default=None)
 

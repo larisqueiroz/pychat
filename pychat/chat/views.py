@@ -2,8 +2,9 @@ from django.db.models import QuerySet
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password
 from rest_framework.utils import json
-
 from .models import *
+from django.conf import settings
+
 
 def EnterChat(request):
     if request.method == 'POST':
@@ -33,7 +34,8 @@ def ReadAndSendMessage(request, chat_name, username):
     context = {
         "messages": messages,
         "user": username,
-        "chat_name": chat_name
+        "chat_name": chat_name,
+        'MEDIA_URL': settings.MEDIA_URL,
     }
     print(context)
     return render(request, 'chat.html', context)

@@ -20,11 +20,17 @@
                             {% if x.user_id.username != user %}
                                 <div class="receive">
                                     <p style="color: #000;"> <strong>{{x.user_id.username}}</strong>: {{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    {% if x.img_base64 %}
+                                        <img class="received_img" src="{{ MEDIA_URL }}{{x.img_base64}}">
+                                    {% endif %}
                                     <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
                                 </div>
                             {% else %}
                                 <div class="send">
                                     <p style="color: #000;">{{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    {% if x.img_base64 %}
+                                        <img class="sent_img" src="{{ MEDIA_URL }}{{x.img_base64}}">
+                                    {% endif %}
                                     <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
                                 </div>
                             {% endif %}
@@ -119,6 +125,7 @@
 
         var sender = messageData['sender'];
         var message = messageData['message'];
+        var image = messageData['image_base64'] || '';
         console.log(messageData);
 
         if (sender == '{{user}}'){
@@ -139,11 +146,10 @@
         var messageDiv = document.getElementById('chatContainer');
 
         if (sender != '{{user}}' && message != '') {
-            messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p></div>';
-        } if (sender == '{{user}}' && message != '') {
-            messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p><p style="font-size:0.8vw; color: #ffffff";>' + formattedDate + '</p></div>';
-
-        }
+        messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p>' + (image ? '<img class="received_img" src="' + image + '">' : '') + '<p style="font-size:0.8vw; color: #ffffff">' + formattedDate + '</p></div>';
+    } else if (sender == '{{user}}' && message != '')  {
+        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p>' + (image ? '<img class="sent_img" src="' + image + '">' : '') + '<p style="font-size:0.8vw; color: #ffffff">' + formattedDate + '</p></div>';
+    }
         scrollToBottom();
     });
     window.onload = scrollToBottom;
@@ -347,6 +353,13 @@
 
     .lbl {
         color: white;
+    }
+
+    .received_img, .sent_img {
+        width: 250px;
+        height: auto;
+        margin-top: 10px;
+        border-radius: 5px;
     }
 
     @media only screen and (max-width: 600px) {
