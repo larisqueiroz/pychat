@@ -125,7 +125,7 @@
 
         var sender = messageData['sender'];
         var message = messageData['message'];
-        var image = messageData['image_base64'] || '';
+        var image = messageData['image_base64'];
         console.log(messageData);
 
         if (sender == '{{user}}'){
@@ -144,12 +144,22 @@
         var formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
 
         var messageDiv = document.getElementById('chatContainer');
+        console.log(image);
+
+        var imageTagRec = image ? `<img class="received_img" src="${image}">` : '';
+        var imageTagSent = image ? `<img class="sent_img" src="${image}">` : '';
 
         if (sender != '{{user}}' && message != '') {
-        messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + '<strong>' + sender + '</strong>: ' + message + '</p>' + (image ? '<img class="received_img" src="' + image + '">' : '') + '<p style="font-size:0.8vw; color: #ffffff">' + formattedDate + '</p></div>';
-    } else if (sender == '{{user}}' && message != '')  {
-        messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p>' + (image ? '<img class="sent_img" src="' + image + '">' : '') + '<p style="font-size:0.8vw; color: #ffffff">' + formattedDate + '</p></div>';
-    }
+            messageDiv.innerHTML += `<div class="receive"><p style="color: #000;"><strong>${sender}</strong>: ${message}</p>${imageTagRec}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+        } else if (sender == '{{user}}' && message != '')  {
+            messageDiv.innerHTML += `<div class="send"><p style="color: #000;">${message}</p>${imageTagSent}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+        } else if (image) {
+            if (sender != '{{user}}') {
+                messageDiv.innerHTML += `<div class="receive">${imageTagRec}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+            } else {
+                messageDiv.innerHTML += `<div class="send">${imageTagSent}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+            }
+        }
         scrollToBottom();
     });
     window.onload = scrollToBottom;
