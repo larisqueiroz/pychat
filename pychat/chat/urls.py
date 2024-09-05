@@ -4,5 +4,7 @@ from .views import *
 
 urlpatterns = [
     path('', EnterChat, name='lobby'),
-    path('<str:chat_name>/<str:username>', ReadAndSendMessage, name='chat')
+    path('<str:chat_name>/<str:username>', ReadAndSendMessage, name='chat'),
+    path('signup', SignUp, name='signup'),
+    path('signin', SignIn, name='signin'),
 ]
