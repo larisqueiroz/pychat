@@ -1,7 +1,7 @@
 import jwt
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
-from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponseNotFound, HttpResponse, HttpRequest, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect, csrf_exempt
@@ -9,11 +9,13 @@ from rest_framework.authentication import CSRFCheck, SessionAuthentication, Basi
 from rest_framework.decorators import permission_classes, api_view, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.utils import json
 from rest_framework import exceptions
 from django.middleware.csrf import get_token
 from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.views import APIView
+import requests
 
 from .models import *
 from django.conf import settings
@@ -22,15 +24,28 @@ from .serializers import UserSerializer
 from .utils import generate_token, generate_refresh_token
 
 @permission_classes([IsAuthenticated])
-def EnterChat(request):
+def EnterChat(request, username):
     jwt_token = request.COOKIES.get('jwt')
+    refresh_token = request.COOKIES.get('refreshtoken')
 
     if not jwt_token:
-        return HttpResponseBadRequest("Missing JWT token")
+        return HttpResponseBadRequest("Unauthenticated.")
+
+    try:
+        access_token = jwt_token
+        payload = jwt.decode(
+            access_token, settings.SECRET_KEY, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        try:
+            refresh = jwt.decode(
+                refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            redirect('signin')
+    except (jwt.InvalidTokenError, jwt.DecodeError):
+        return HttpResponseBadRequest("Invalid token")
 
     if request.method == 'POST':
-        username = request.data['username']
-        chat_name = request.data['chat_name']
+        chat_name = request.POST['chat_name']
         print(username, chat_name)
 
         saved_user = User.objects.filter(username=username)
@@ -48,8 +63,26 @@ def EnterChat(request):
             return redirect('chat', chat_name=chat_name, username=username)
     return render(request, 'lobby.html')
 
-
+@permission_classes([IsAuthenticated])
 def ReadAndSendMessage(request, chat_name, username):
+    jwt_token = request.COOKIES.get('jwt')
+    refresh_token = request.COOKIES.get('refreshtoken')
+    if not jwt_token:
+        return HttpResponseBadRequest("Unauthenticated.")
+
+    try:
+        access_token = jwt_token
+        payload = jwt.decode(
+            access_token, settings.SECRET_KEY, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        try:
+            refresh = jwt.decode(
+                refresh_token, settings.SECRET_KEY, algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            redirect('signin')
+    except (jwt.InvalidTokenError, jwt.DecodeError):
+        return HttpResponseBadRequest("Invalid token")
+
     chat = Chat.objects.filter(active=True).get(name=chat_name)
     messages = Message.objects.filter(active=True).filter(chat_id=chat.id)
 
@@ -83,7 +116,6 @@ def SignUp(request):
 
     return render(request, 'signup.html')
 
-@api_view(['GET','POST'])
 @permission_classes([AllowAny])
 def SignIn(request):
     if request.method == 'POST':
@@ -102,24 +134,19 @@ def SignIn(request):
         token = generate_token(exists)
         refresh_token = generate_refresh_token(exists)
 
-        response = Response()
-        response.set_cookie(key='refreshtoken', value=refresh_token, httponly=True)
+        response = HttpResponseRedirect('/' + str(username) + '/')
         response.set_cookie(key='jwt', value=token, httponly=True)
-        response.data = {
-            'access_token': token,
-            'user': UserSerializer(exists).data
-        }
+        response.set_cookie(key='refreshtoken', value=refresh_token, httponly=True)
+        response.headers["Authorization"] = "Bearer " + str(token)
+
         print(refresh_token)
         print(token)
 
-        try:
-            access_token = token
-            payload = jwt.decode(
-                access_token, settings.SECRET_KEY, algorithms=['HS256'])
-
-        except jwt.ExpiredSignatureError:
-            print("TOKEN? ")
-            raise exceptions.AuthenticationFailed('access_token expired')
-
         return response
     return render(request, 'login.html')
+
+def SignOut(request):
+    response = HttpResponseRedirect('signin')
+    response.delete_cookie('jwt')
+    response.delete_cookie('refreshtoken')
+    return response
