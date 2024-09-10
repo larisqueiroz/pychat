@@ -9,11 +9,12 @@
     <center>
         <div class="parent">
         <div class="container">
-            <h1 class="title">Lobby</h1>
+            <h1 class="title">Sign In</h1>
             <form id="form" action="" method="POST">
-                {% csrf_token %}
-                <label class="lbl" for="">Room</label><br>
-                <input type="text" placeholder="Room" name="chat_name" required><br>
+                <label class="lbl" for="">Username</label><br>
+                <input type="text" placeholder="Username" name="username" required><br>
+                <label class="lbl" for="">Password</label><br>
+                <input type="text" placeholder="password" name="password" required><br>
                 <center><button class="button" type="submit">Submit</button></center>
             </form>
         </div>
