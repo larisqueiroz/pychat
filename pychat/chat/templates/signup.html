@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'chat/media/favicon.ico' %}" />
+</head>
+<body>
+    <center>
+        <div class="parent">
+        <div class="container">
+            <h1 class="title">Sign Up</h1>
+            <form action="" method="POST">
+                {% csrf_token %}
+                <label class="lbl" for="">Create Username</label><br>
+                <input type="text" placeholder="Username" name="username" required><br>
+                <label class="lbl" for="">Create Password</label><br>
+                <input type="text" placeholder="password" name="password" required><br>
+                <center><button class="button" type="submit">Submit</button></center>
+            </form>
+        </div>
+        </div>
+    </center>
+</body>
+<style>
+    * form {
+        width:70%;
+    }
+
+    .parent {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    .container {
+        background-color: #891D29;
+        height: 30vh;
+        width: 30%;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        label-color: #ffffff;
+    }
+
+    body {
+        background-color: #441530;
+    }
+
+    .lbl{
+        color: white;
+        font-size: 15px;
+    }
+
+    .title{
+        color: white;
+        margin: 0;
+        text-align: center;
+    }
+
+    input {
+        padding: 5px;
+        border: 1px;
+        width: 100%;
+        margin: 5px;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 5px;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        width: 30%;
+    }
+</style>
+</html>

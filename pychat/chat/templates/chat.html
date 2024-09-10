@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat</title>
+    <!-- load static -->
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'chat/media/favicon.ico' %}" />
+    <!-- link to h=css file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div class="parent">
+        <div class="child-2">
+            <a class="signout" href="http://localhost:8000/signout">Log Out</a>
+            <center><h2 class="lbl">{{chat_name}}</h2></center><hr>
+            <div class="chat-body-parent">
+                <div class="chat-body" id="tasks">
+                    <div class="message" id="chatContainer">
+                       <!-- Received messages are displayed here -->
+                        {% for x in messages %}
+                            {% if x.user_id.username != user %}
+                                <div class="receive">
+                                    <p style="color: #000;"> <strong>{{x.user_id.username}}</strong>: {{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    {% if x.img_base64 %}
+                                        <img class="received_img" src="{{ MEDIA_URL }}{{x.img_base64}}">
+                                    {% endif %}
+                                    <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
+                                </div>
+                            {% else %}
+                                <div class="send">
+                                    <p style="color: #000;">{{x.content}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                                    {% if x.img_base64 %}
+                                        <img class="sent_img" src="{{ MEDIA_URL }}{{x.img_base64}}">
+                                    {% endif %}
+                                    <p style="font-size:0.8vw; color: #ffffff">{{x.datetime_sent|date:"d/m/Y, H:i"}}</p>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- End of received messages -->
+                    </div>
+
+                    <div class="form">
+                        <form action="" id="message-form" method="POST">
+                            {% csrf_token %}
+                            <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your message" required></textarea>
+                            <input type="file" accept=".jpg, .jpeg, .png" id="image" name="image">
+                            <button class="submit" type="submit">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function scrollToBottom() {
+        var chatContainer = document.getElementById("chatContainer");
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    const websocket = window.location.protocol === "https:" ? "wss" : "ws";
+    const websocketEndpoint = `${websocket}://${window.location.host}/ws/notification/{{chat_name}}/`;
+    const socket = new WebSocket(websocketEndpoint);
+
+    socket.onmessage = (event) => {
+        console.log("Websocket received", event.data);
+    }
+
+    socket.onopen = (event) => {
+        console.log("Websocket oppened connection");
+    }
+
+    socket.onclose = (event) => {
+        console.log("Websocket closed connection");
+    }
+
+
+    document.getElementById('image').addEventListener('change', function(event) {
+        event.preventDefault();
+        const input = event.target;
+        var base64;
+        var res;
+        var reader = new FileReader();
+        const file = input.files[0];
+        if (file) {
+            reader.onloadend = function () {
+            baseString = reader.result;
+            console.log(baseString);
+
+            var currentDate = new Date();
+            currentDate.setHours(currentDate.getHours() - 3);
+
+            socket.send(
+                JSON.stringify({
+                    'message': '',
+                    'chat_name': '{{chat_name}}',
+                    'sender': '{{user}}',
+                    'datetime_sent': currentDate,
+                    'image_base64': baseString
+                })
+            );
+        };
+        res = reader.readAsDataURL(file);
+        }
+
+    });
+
+    document.getElementById('message-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = document.getElementById('msg').value;
+        var currentDate = new Date();
+        currentDate.setHours(currentDate.getHours() - 3);
+        socket.send(
+            JSON.stringify({
+                'message': message,
+                'chat_name': '{{chat_name}}',
+                'sender': '{{user}}',
+                'datetime_sent': currentDate
+            })
+        );
+        console.log("WebSocket message sent");
+    });
+
+    socket.addEventListener("message", (event) => {
+        const messageData = JSON.parse(event.data)['message'];
+
+        var sender = messageData['sender'];
+        var message = messageData['message'];
+        var image = messageData['image_base64'];
+        console.log(messageData);
+
+        if (sender == '{{user}}'){
+            document.getElementById('msg').value = '';
+        }
+
+        var currentDate = new Date();
+
+        var day = String(currentDate.getDate()).padStart(2, '0');
+        var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        var year = currentDate.getFullYear();
+
+        var hours = String(currentDate.getHours()).padStart(2, '0');
+        var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+
+        var formattedDate = `${day}/${month}/${year}, ${hours}:${minutes}`;
+
+        var messageDiv = document.getElementById('chatContainer');
+        console.log(image);
+
+        var imageTagRec = image ? `<img class="received_img" src="${image}">` : '';
+        var imageTagSent = image ? `<img class="sent_img" src="${image}">` : '';
+
+        if (sender != '{{user}}' && message != '') {
+            messageDiv.innerHTML += `<div class="receive"><p style="color: #000;"><strong>${sender}</strong>: ${message}</p>${imageTagRec}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+        } else if (sender == '{{user}}' && message != '')  {
+            messageDiv.innerHTML += `<div class="send"><p style="color: #000;">${message}</p>${imageTagSent}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+        } else if (image) {
+            if (sender != '{{user}}') {
+                messageDiv.innerHTML += `<div class="receive">${imageTagRec}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+            } else {
+                messageDiv.innerHTML += `<div class="send">${imageTagSent}<p style="font-size:0.8vw; color: #ffffff">${formattedDate}</p></div>`;
+            }
+        }
+        scrollToBottom();
+    });
+    window.onload = scrollToBottom;
+</script>
+<style>
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    }
+
+
+    .parent {
+      background-color: #441530;
+    }
+
+    nav {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background-color: #659DBD;
+        padding: 10px;
+    }
+
+    nav ul li {
+        list-style: none;
+        display: inline-block;
+        padding: 10px;
+    }
+
+    nav ul li:hover {
+        background-color: dodgerblue;
+        color: #fff;
+        transition: 0.8s;
+    }
+
+    nav ul li a {
+        text-decoration: none;
+        color: #fff;
+    }
+
+    .parent {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        /* background-image: url("/static/img/bck.jpg");  */
+
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        align-items: center;
+        width: 100%;
+    }
+
+    .child-1 {
+        /* height: 70vh; */
+        width: 30%;
+        margin: 10px;
+        border-radius: 10px;
+
+        background-color: white;
+    }
+
+    .chat-room {
+        width: 100%;
+        /* max-height: ; */
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        background-color: #fff;
+        border: 1px solid dodgerblue;
+    }
+
+    .chat-room h3 {
+        color: #000;
+    }
+
+    .chat-room h3 {
+        background-color: gray;
+        padding: 10px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    .chat-room h3 a {
+        text-decoration: none;
+        color: white;
+    }
+
+
+    .child-2 {
+        /* max-height: 100vh; */
+        width: 50%;
+        margin: 10px;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #891D29;
+    }
+
+    .chat-body-parent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* height: 60vh; */
+    }
+
+    .chat-body, .message {
+        /* max-height: 100vh; */
+        width: 100%;
+        background-color: #f5f2d0;
+        border-radius: 10px;
+        display: flex;
+        padding: 10px;
+        flex-direction: column;
+    }
+
+    .message {
+        max-height: 400px;  /* Or whatever height value you see fit */
+        overflow-y: auto;
+    }
+
+    .chat-body .message .receive, .send {
+        background-color: #B1A296;
+        max-width: 400px;
+
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .send:hover {
+        padding: 15px;
+        transition: 0.8s;
+    }
+
+    .receive:hover {
+        padding: 15px;
+        transition: 0.8s;
+    }
+
+    .chat-body .message .send {
+        align-self: flex-end;
+    }
+
+    .chat-body .message .receive {
+        align-self: flex-start;
+    }
+
+    form {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    form textarea {
+        width: 70%;
+        height: 40px;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    form button {
+        width: 20%;
+        padding: 10px;
+        background-color: #808080;
+        border-radius: 5px;
+        border: none;
+        color: #000;
+    }
+
+     .add-image {
+        width: 8%;
+        padding: 10px;
+        background-color: #B19CD9;
+        border-radius: 5px;
+        border: none;
+        color: #000;
+    }
+
+    .buttonpng {
+      width: 12px;
+      height: 12px;
+    }
+
+    .lbl {
+        color: white;
+    }
+
+    .received_img, .sent_img {
+        width: 250px;
+        height: auto;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+
+    .signout {
+        float: right;
+        color: blue;
+        font-size: 15px;
+    }
+
+    @media only screen and (max-width: 600px) {
+    .child-2 {
+        width: 100%;
+    }
+
+}
+
+</style>
+</html>
