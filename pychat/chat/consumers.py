@@ -41,8 +41,8 @@ class Consumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def create(self, data):
         print(data)
-        chat_by_name = Chat.objects.get(name=data['chat_name'])
-        sender = User.objects.get(username=data['sender'])
+        chat_by_name = Chat.objects.filter(name=data['chat_name']).first()
+        sender = User.objects.filter(username=data['sender']).first()
         if 'image_base64' in data:
             if data['image_base64'] != "":
                 image = base64_to_image(data['image_base64'])

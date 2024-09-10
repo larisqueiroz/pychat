@@ -56,7 +56,7 @@ def EnterChat(request, username):
 
         try:
             saved = Chat.objects.get(name=chat_name)
-            return redirect('chat', chat_name=chat_name, username=username)
+            return redirect('chat', chat_name=saved.name, username=username)
         except:
             new_chat = Chat(name=chat_name)
             new_chat.save()
@@ -103,7 +103,7 @@ def SignUp(request):
         if username == "" or password == "":
             return HttpResponseBadRequest("Username and password are required")
 
-        exists = User.objects.get(username=username).first()
+        exists = User.objects.filter(username=username).first()
         if exists is not None:
             return HttpResponseBadRequest(f"Username not available.")
 

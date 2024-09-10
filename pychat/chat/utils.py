@@ -13,7 +13,7 @@ def base64_to_image(base64_string):
 
 def generate_token(user):
     token_payload = {
-        'user_id': user.id,
+        'user_id': str(user.id),
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
         'iat': datetime.datetime.utcnow()
     }
@@ -24,7 +24,7 @@ def generate_token(user):
 
 def generate_refresh_token(user):
     refresh_payload = {
-        'user_id': user.id,
+        'user_id': str(user.id),
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
         'iat': datetime.datetime.utcnow()
     }
